@@ -1,0 +1,32 @@
+Event Descriptions
+There are a common set of fields for each of the events.
+
+{
+  "name": "myName",
+  "cat": "category,list",
+  "ph": "B",
+  "ts": 12345,
+  "pid": 123,
+  "tid": 456,
+  "args": {
+    "someArg": 1,
+    "anotherArg": {
+      "value": "my value"
+    }
+  }
+}
+
+
+General Event Structure
+
+name: The name of the event, as displayed in Trace Viewer
+cat: The event categories. This is a comma separated list of categories for the event. The categories can be used to hide events in the Trace Viewer UI.
+ph: The event type. This is a single character which changes depending on the type of event being output. The valid values are listed in the table below. We will discuss each phase type below.
+ts: The timestamp of the event. The timestamps are provided at microsecond granularity, unless specified otherwise via defaultTimeUnit
+pid: The process ID for the process that output this event.
+tid: The thread ID for the thread that output this event.
+args: Any arguments provided for the event. Some of the event types have required argument fields, otherwise, you can put any information you wish in here. The arguments are displayed in Trace Viewer when you view an event in the analysis section.
+
+
+Full document:
+https://docs.google.com/document/d/18fpRVNZQpLbY9t95lWuuxlfK8JR8YopLdcLwQNyjP8M/edit#heading=h.uxpopqvbjezh
