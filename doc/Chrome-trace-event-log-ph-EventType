@@ -11,3 +11,6 @@ Sample Events           P
 Object Events           N (created), O (snapshot), D (destroyed)
 Metadata Events         M
 Memory Dump Events      V (global), v (process)
+
+Full document:
+https://docs.google.com/document/d/18fpRVNZQpLbY9t95lWuuxlfK8JR8YopLdcLwQNyjP8M/edit#heading=h.uxpopqvbjezh
