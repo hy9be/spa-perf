@@ -24,7 +24,7 @@ public class SampleTestScript {
 
         ConsolePrinter printer = new ConsolePrinter();
 
-        printer.printLogToConsole(driver, LogType.BROWSER);
+        //printer.printLogToConsole(driver, LogType.BROWSER);
         printer.printLogToConsole(driver, LogType.PERFORMANCE);
 
         driver.detach();

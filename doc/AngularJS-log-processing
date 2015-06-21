@@ -1,0 +1,7 @@
+This is how benchpress in AngularJS framework paring the timeline logs
+
+1. normalize the log
+https://github.com/angular/angular/blob/8ccafb0524e3ac4c51af34ef88e0fe27482336a6/modules/benchpress/src/webdriver/chrome_driver_extension.js#L60
+
+2. parse the log
+https://github.com/angular/angular/blob/8ccafb0524e3ac4c51af34ef88e0fe27482336a6/modules/benchpress/src/metric/perflog_metric.js

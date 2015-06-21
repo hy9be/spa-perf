@@ -19,6 +19,7 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         super(getPerformanceLoggingCapabilities());
     }
 
+    // Use static method to generate the capabilities object to initiate the driver
     private static DesiredCapabilities getPerformanceLoggingCapabilities() {
         DesiredCapabilities caps = DesiredCapabilities.chrome();
 
