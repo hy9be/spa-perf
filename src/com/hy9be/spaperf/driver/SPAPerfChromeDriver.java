@@ -1,8 +1,7 @@
-package com.hy9be.spaperf.probe;
+package com.hy9be.spaperf.driver;
 
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.openqa.selenium.remote.CapabilityType;
@@ -15,25 +14,31 @@ import java.util.logging.Level;
 /**
  * Created by hyou on 6/20/15.
  */
-public class ChromeDriverPerformanceProbe {
-    public ChromeDriverPerformanceProbe() {
-        ChromeDriver driver = new ChromeDriver();
+public class SPAPerfChromeDriver extends ChromeDriver {
+    public SPAPerfChromeDriver() {
+        super(getPerformanceLoggingCapabilities());
+    }
 
+    private static DesiredCapabilities getPerformanceLoggingCapabilities() {
         DesiredCapabilities caps = DesiredCapabilities.chrome();
+
+        // Enable performance logging
         LoggingPreferences logPrefs = new LoggingPreferences();
         logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
         caps.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 
+        // Enable timeline tracing
         Map<String, Object> prefs = new HashMap<String, Object>();
-        prefs.put("traceCategories", "browser,devtools.timeline,devtools"); // comma-separated trace categories
-        prefs.put("enableTimeline", true);
+        prefs.put("traceCategories", "blink.console, disabled-by-default-devtools.timeline");
 
         ChromeOptions options = new ChromeOptions();
         options.setExperimentalOption("perfLoggingPrefs", prefs);
         caps.setCapability(ChromeOptions.CAPABILITY, options);
 
-        for (LogEntry entry : driver.manage().logs().get(LogType.PERFORMANCE)) {
-            System.out.println(entry.toString());
-        }
+        return caps;
+    }
+
+    public void detach() {
+        this.close();
     }
 }

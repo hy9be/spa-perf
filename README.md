@@ -12,3 +12,4 @@ The framework will be implemented in Java first. We will port it to other langua
 ## Reference
 Performance logging with chrome webdriver
 https://sites.google.com/a/chromium.org/chromedriver/logging/performance-log
+https://github.com/cabbiepete/browser-perf/commit/046f65f02db418c17ec2d59c43abcc0de642a60f
