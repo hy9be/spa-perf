@@ -1,9 +1,11 @@
 package com.hy9be.spaperf.samplescript;
 
 import com.hy9be.spaperf.driver.SPAPerfChromeDriver;
+import com.hy9be.spaperf.output.ConsolePrinter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.logging.LogType;
 
 public class SampleTestScript {
     public static void main(String[] args) {
@@ -19,6 +21,12 @@ public class SampleTestScript {
         WebElement element = driver.findElement(By.name("q"));
         element.sendKeys("Selenium Conference");
         element.sendKeys(Keys.ENTER);
+
+        ConsolePrinter printer = new ConsolePrinter();
+
+        printer.printLogToConsole(driver, LogType.BROWSER);
+        printer.printLogToConsole(driver, LogType.PERFORMANCE);
+
         driver.detach();
     }
 
