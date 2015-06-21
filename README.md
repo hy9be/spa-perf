@@ -1,8 +1,9 @@
 # spa-perf
-A chrome webdriver based framework to measure the performance of user actions on single page app
+"Single Page Application - Performance“
+A chrome webdriver based framework to measure the performance and responsiveness of UI on single page web app
 
 ## Introduction
-There are existing libraries and tools to monitor the page loading performance of web application. But for single page app, initial loading of the page is not the full story. After the page is loaded, performance of subsequent user actions is also a very important metric.
+There are several existing libraries and tools to monitor the page loading performance of web application. But for single page app, initial loading of the page is not the full story. After the page is loaded, performance of subsequent user actions is also a very important metric.
 
 Thus we come up with this framework to support the in-depth performance measurement (mostly from Chrome performance logging and tracing data) of the actions on single page apps.
 
