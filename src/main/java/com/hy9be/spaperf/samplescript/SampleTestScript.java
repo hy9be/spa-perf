@@ -1,7 +1,7 @@
-package com.hy9be.spaperf.samplescript;
+package main.java.com.hy9be.spaperf.samplescript;
 
-import com.hy9be.spaperf.driver.SPAPerfChromeDriver;
-import com.hy9be.spaperf.output.ConsolePrinter;
+import main.java.com.hy9be.spaperf.driver.SPAPerfChromeDriver;
+import main.java.com.hy9be.spaperf.output.ConsolePrinter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;

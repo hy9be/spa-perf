@@ -1,4 +1,4 @@
-package com.hy9be.spaperf.output;
+package main.java.com.hy9be.spaperf.output;
 
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.logging.LogEntry;

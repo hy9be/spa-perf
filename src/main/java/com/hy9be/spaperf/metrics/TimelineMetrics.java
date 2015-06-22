@@ -1,6 +1,6 @@
-package com.hy9be.spaperf.metrics;
+package main.java.com.hy9be.spaperf.metrics;
 
-
+//import org.json.JSONObject;
 
 /**
  * The class parsing the timeline log info
@@ -12,6 +12,7 @@ public class TimelineMetrics {
 
     }
 
+    /*
     private void processTimelineRecord(JSONObject ) {
         switch (e.ph) {
             case 'I': // Instant Event
@@ -50,4 +51,5 @@ public class TimelineMetrics {
             break;
         }
     }
+    */
 }
