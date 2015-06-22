@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ad5c298d-50a5-465b-be3e-72fc17866f78" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/doc/AngularJS-log-processing" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/hy9be/spaperf/output/ConsolePrinter.java" afterPath="$PROJECT_DIR$/src/com/hy9be/spaperf/output/ConsolePrinter.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/hy9be/spaperf/driver/SPAPerfChromeDriver.java" afterPath="$PROJECT_DIR$/src/com/hy9be/spaperf/driver/SPAPerfChromeDriver.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/com/hy9be/spaperf/samplescript/SampleTestScript.java" afterPath="$PROJECT_DIR$/src/com/hy9be/spaperf/samplescript/SampleTestScript.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
@@ -41,11 +39,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="SampleTestScript.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="SampleTestScript.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/hy9be/spaperf/samplescript/SampleTestScript.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.83516484">
+              <caret line="30" column="23" selection-start-line="30" selection-start-column="23" selection-end-line="30" selection-end-column="23" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -99,24 +97,24 @@
         <entry file="file://$PROJECT_DIR$/src/com/hy9be/spaperf/driver/SPAPerfChromeDriver.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="21" column="83" selection-start-line="21" selection-start-column="83" selection-end-line="21" selection-end-column="83" />
+              <caret line="41" column="79" selection-start-line="41" selection-start-column="79" selection-end-line="41" selection-end-column="79" />
               <folding>
                 <element signature="imports" expanded="true" />
                 <element signature="e#546#547#0" expanded="true" />
                 <element signature="e#604#605#0" expanded="true" />
                 <element signature="e#1144#1160#0" expanded="true" />
-                <element signature="e#1495#1496#0" expanded="true" />
-                <element signature="e#1523#1524#0" expanded="true" />
+                <element signature="e#1576#1577#0" expanded="true" />
+                <element signature="e#1604#1605#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="AngularJS-log-processing" pinned="false" current-in-tab="true">
+      <file leaf-file-name="AngularJS-log-processing" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/doc/AngularJS-log-processing">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="47" selection-start-line="0" selection-start-column="47" selection-end-line="0" selection-end-column="47" />
+              <caret line="0" column="45" selection-start-line="0" selection-start-column="45" selection-end-line="0" selection-end-column="45" />
               <folding />
             </state>
           </provider>
@@ -176,10 +174,10 @@
         <option value="$PROJECT_DIR$/src/com/hy9be/spaperf/metrics/TimeLineMetrics.java" />
         <option value="$PROJECT_DIR$/src/com/hy9be/spaperf/metrics/TimelineMetrics.java" />
         <option value="$PROJECT_DIR$/src/com/hy9be/spaperf/metrics/TracingMetrics.java" />
-        <option value="$PROJECT_DIR$/src/com/hy9be/spaperf/samplescript/SampleTestScript.java" />
-        <option value="$PROJECT_DIR$/src/com/hy9be/spaperf/driver/SPAPerfChromeDriver.java" />
         <option value="$PROJECT_DIR$/src/com/hy9be/spaperf/output/ConsolePrinter.java" />
         <option value="$PROJECT_DIR$/doc/AngularJS-log-processing" />
+        <option value="$PROJECT_DIR$/src/com/hy9be/spaperf/driver/SPAPerfChromeDriver.java" />
+        <option value="$PROJECT_DIR$/src/com/hy9be/spaperf/samplescript/SampleTestScript.java" />
       </list>
     </option>
   </component>
@@ -685,8 +683,8 @@
             <element signature="e#546#547#0" expanded="true" />
             <element signature="e#604#605#0" expanded="true" />
             <element signature="e#1144#1160#0" expanded="true" />
-            <element signature="e#1495#1496#0" expanded="true" />
-            <element signature="e#1523#1524#0" expanded="true" />
+            <element signature="e#1576#1577#0" expanded="true" />
+            <element signature="e#1604#1605#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -729,8 +727,8 @@
             <element signature="e#546#547#0" expanded="true" />
             <element signature="e#604#605#0" expanded="true" />
             <element signature="e#1144#1160#0" expanded="true" />
-            <element signature="e#1495#1496#0" expanded="true" />
-            <element signature="e#1523#1524#0" expanded="true" />
+            <element signature="e#1576#1577#0" expanded="true" />
+            <element signature="e#1604#1605#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -773,8 +771,8 @@
             <element signature="e#546#547#0" expanded="true" />
             <element signature="e#604#605#0" expanded="true" />
             <element signature="e#1144#1160#0" expanded="true" />
-            <element signature="e#1495#1496#0" expanded="true" />
-            <element signature="e#1523#1524#0" expanded="true" />
+            <element signature="e#1576#1577#0" expanded="true" />
+            <element signature="e#1604#1605#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -809,8 +807,8 @@
             <element signature="e#546#547#0" expanded="true" />
             <element signature="e#604#605#0" expanded="true" />
             <element signature="e#1144#1160#0" expanded="true" />
-            <element signature="e#1495#1496#0" expanded="true" />
-            <element signature="e#1523#1524#0" expanded="true" />
+            <element signature="e#1576#1577#0" expanded="true" />
+            <element signature="e#1604#1605#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -911,16 +909,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/hy9be/spaperf/samplescript/SampleTestScript.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/hy9be/spaperf/output/ConsolePrinter.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -931,26 +919,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/doc/AngularJS-log-processing">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="45" selection-start-line="0" selection-start-column="45" selection-end-line="0" selection-end-column="45" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/hy9be/spaperf/driver/SPAPerfChromeDriver.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="21" column="83" selection-start-line="21" selection-start-column="83" selection-end-line="21" selection-end-column="83" />
+          <caret line="41" column="79" selection-start-line="41" selection-start-column="79" selection-end-line="41" selection-end-column="79" />
           <folding>
             <element signature="imports" expanded="true" />
             <element signature="e#546#547#0" expanded="true" />
             <element signature="e#604#605#0" expanded="true" />
             <element signature="e#1144#1160#0" expanded="true" />
-            <element signature="e#1495#1496#0" expanded="true" />
-            <element signature="e#1523#1524#0" expanded="true" />
+            <element signature="e#1576#1577#0" expanded="true" />
+            <element signature="e#1604#1605#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/doc/AngularJS-log-processing">
+    <entry file="file://$PROJECT_DIR$/src/com/hy9be/spaperf/samplescript/SampleTestScript.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="47" selection-start-line="0" selection-start-column="47" selection-end-line="0" selection-end-column="47" />
-          <folding />
+        <state vertical-scroll-proportion="0.83516484">
+          <caret line="30" column="23" selection-start-line="30" selection-start-column="23" selection-end-line="30" selection-end-column="23" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

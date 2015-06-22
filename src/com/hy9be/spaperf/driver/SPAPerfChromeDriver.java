@@ -39,6 +39,7 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         return caps;
     }
 
+    // Detach the driver but do not close the browser session (vs. this.close())
     public void detach() {
         this.close();
     }

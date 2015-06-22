@@ -27,7 +27,8 @@ public class SampleTestScript {
         //printer.printLogToConsole(driver, LogType.BROWSER);
         printer.printLogToConsole(driver, LogType.PERFORMANCE);
 
-        driver.detach();
+        //driver.detach();
+        driver.close();
     }
 
     public static void TestUnsplashCom () {
