@@ -1,6 +1,6 @@
-package main.java.com.hy9be.spaperf.metrics;
+package com.hy9be.spaperf.metrics;
 
-//import org.json.JSONObject;
+import org.json.JSONObject;
 
 /**
  * The class parsing the timeline log info

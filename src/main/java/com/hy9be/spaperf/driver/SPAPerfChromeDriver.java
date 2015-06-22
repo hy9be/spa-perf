@@ -1,4 +1,4 @@
-package main.java.com.hy9be.spaperf.driver;
+package com.hy9be.spaperf.driver;
 
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;

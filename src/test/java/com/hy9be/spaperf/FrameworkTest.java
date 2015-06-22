@@ -1,4 +1,4 @@
-package test.java.com.hy9be.spaperf;
+package com.hy9be.spaperf;
 
 /**
  * Unit test

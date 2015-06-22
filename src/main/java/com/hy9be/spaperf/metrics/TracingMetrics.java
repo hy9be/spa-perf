@@ -1,4 +1,4 @@
-package main.java.com.hy9be.spaperf.metrics;
+package com.hy9be.spaperf.metrics;
 
 /**
  * The class parsing the timeline log info
