@@ -29,12 +29,12 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         caps.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 
         // Enable timeline tracing
-        Map<String, Object> prefs = new HashMap<String, Object>();
-        prefs.put("traceCategories", "blink.console, disabled-by-default-devtools.timeline");
-
-        ChromeOptions options = new ChromeOptions();
-        options.setExperimentalOption("perfLoggingPrefs", prefs);
-        caps.setCapability(ChromeOptions.CAPABILITY, options);
+        Map<String, Object> chromeOptions = new HashMap<String, Object>();
+        Map<String, String> perfLoggingPrefs = new HashMap<String, String>();
+        perfLoggingPrefs.put("traceCategories", "blink.console, disabled-by-default-devtools.timeline");
+        chromeOptions.put("perfLoggingPrefs", perfLoggingPrefs);
+        //chromeOptions.put("debuggerAddress", "127.0.0.1:10134");
+        caps.setCapability(ChromeOptions.CAPABILITY, chromeOptions);
 
         return caps;
     }
