@@ -1,12 +1,9 @@
 package com.hy9be.spaperf.metrics;
 
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-import org.json.simple.parser.JSONParser;
+import com.eclipsesource.json.JsonObject;
 import org.openqa.selenium.logging.LogEntry;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * The class parsing the timeline log info
@@ -20,23 +17,21 @@ public class TimelineMetrics {
 
     private void normalizeTimelineRecord(List<LogEntry> logEntries) {
         for (LogEntry logEntry : logEntries) {
-            JSONObject logEntryJSONObjWrapper = (JSONObject)JSONValue.parse(logEntry.getMessage());
+            JsonObject logEntryJsonWrapper = JsonObject.readFrom(logEntry.getMessage());
 
-            JSONObject logEntryJSONMsg = (JSONObject)logEntryJSONObjWrapper.get("message");
-            JSONObject logEntryJSONParams = (JSONObject)logEntryJSONMsg.get("params");
+            JsonObject logEntryJsonParams = logEntryJsonWrapper.get("message").asObject().get("params").asObject();
 
-            String cat = logEntryJSONObj.getString("cat");
-            String name = logEntryJSONObj.getString("name");
-            String args = logEntryJSONObj.getString("args");
-            JSONObject args_obj = logEntryJSONObj.getJSONObject("args");
-            String pid = logEntryJSONObj.getString("pid");
-            String ph = logEntryJSONObj.getString("ph");
+            String cat = logEntryJsonParams.get("cat").asString();
+            String name = logEntryJsonParams.get("name").asString();
+            JsonObject args = logEntryJsonParams.get("args").asObject();
+            String pid = logEntryJsonParams.get("pid").asString();
+            String ph = logEntryJsonParams.get("ph").asString();
 
             if (cat == "disabled-by-default-devtools.timeline")) {
                 if ((name == "FunctionCall")
-                        && (args.length() == 0
-                        || args_obj.getString("data").length() == 0
-                        || args_obj.getJSONObject("data").getString("scriptName") != "InjectedScript")) {
+                        && (args != null
+                        || args.get("data").asString().length() == 0
+                        || args.get("data").asObject().get("scriptName").asString() != "InjectedScript")) {
                     ListWrapper.push(normalizedEvents, normalizeEvent(event, {
                             'name': 'script'
                     }));
@@ -73,12 +68,12 @@ public class TimelineMetrics {
                     }
                 }
             }
-        });
+
         return normalizedEvents;
         }
     }
 
-    private void processTimelineRecord(JSONObject logEntry) {
+    private void processTimelineRecord() {
         /*
 
         {"message":{
