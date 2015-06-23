@@ -1,6 +1,7 @@
 package com.hy9be.spaperf.metrics;
 
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import org.apache.commons.collections.map.HashedMap;
 import org.openqa.selenium.logging.LogEntry;
 
@@ -14,11 +15,28 @@ import java.util.Map;
  * Created by hyou on 6/20/15.
  */
 public class TimelineMetrics {
-    private void processTimelineRecords() {
+    /*
+        {"message":{
+            "method":"Tracing.dataCollected",
+            "params":{
+                "args":{"number":8},
+                "cat":"__metadata",
+                "name":"num_cpus",
+                "ph":"M",
+                "pid":37587,
+                "tid":0,
+                "ts":0}},
+            "webview":"browser"}
+    */
+
+    /**
+     * Constructor
+     */
+    public TimelineMetrics() {
 
     }
 
-    private List<JsonObject> processTimelineRecord(List<LogEntry> logEntries) {
+    private List<JsonObject> convertPerfRecordsToEvents(List<LogEntry> logEntries) {
         List<JsonObject> normalizedEvents = new ArrayList<>();
         Map<String, Boolean> majorGCPids = new HashedMap();
 
@@ -67,7 +85,7 @@ public class TimelineMetrics {
                         .add("events", logEntryJsonParams));
             } else if (cat == "v8") {
                 if (name == "majorGC") {
-                    if (ph == "B'") {
+                    if (ph == "B") {
                         majorGCPids.put(pid, true);
                     }
                 }
@@ -77,45 +95,110 @@ public class TimelineMetrics {
         return normalizedEvents;
     }
 
-    private void aggregateData() {
-        /*
+    private JsonObject normalizeEvent(JsonObject chromeEvent, JsonObject data) {
+        JsonObject result = new JsonObject();
 
-        {"message":{
-            "method":"Tracing.dataCollected",
-            "params":{
-                "args":{"number":8},
-                "cat":"__metadata",
-                "name":"num_cpus",
-                "ph":"M",
-                "pid":37587,
-                "tid":0,
-                "ts":0}},
-            "webview":"browser"}
-        {"message":{
-            "method":"Tracing.dataCollected",
-            "params":{
-                "args":{"sort_index":-1},
-                "cat":"__metadata",
-                "name":"process_sort_index",
-                "ph":"M",
-                "pid":37587,
-                "tid":17159,
-                "ts":0}},
-            "webview":"browser"}
-        {"message":{
-            "method":"Tracing.dataCollected",
-            "params":{
-                "args":{"name":"Renderer"},
-                "cat":"__metadata",
-                "name":"process_name",
-                "ph":"M",
-                "pid":37592,
-                "tid":16151,
-                "ts":0}},
-            "webview":"browser"}
+        String ph = chromeEvent.get("ph").asString();
 
-         */
+        if (ph == "S") {
+            ph = "b";
+        } else if (ph == "F") {
+            ph = "e";
+        }
 
+        JsonObject result = new JsonObject()
+                .add("pid", chromeEvent.get("pid").asString())
+                .add("ph", ph)
+                .add("cat", "timeline")
+                .add("ts", chromeEvent.get("ts").asLong() / 1000);
 
+        if (ph == "X") {
+            String dur = chromeEvent.get("dur").asString();
+            if (dur == null || dur.length() == 0) {
+                dur = chromeEvent.get("tdur").asString();
+            }
+            result.add("dur", (dur.length() == 0) ? 0.0 : Long.parseLong(dur) / 1000);
+        }
+
+        for( JsonObject.Member member : data ) {
+            String name = member.getName();
+            JsonValue value = member.getValue();
+            result.add(name, value);
+        }
+
+        return result;
+    }
+
+    private void aggregateEvents() {
+        var result = {
+                "scriptTime": 0,
+                "pureScriptTime": 0
+        };
+        if (this._perfLogFeatures.gc) {
+            result["gcTime"] = 0;
+            result["majorGcTime"] = 0;
+            result["gcAmount"] = 0;
+        }
+        if (this._perfLogFeatures.render) {
+            result["renderTime"] = 0;
+        }
+        StringMapWrapper.forEach(this._microMetrics, (desc, name) => {
+            result[name] = 0;
+        });
+
+        var markStartEvent = null;
+        var markEndEvent = null;
+        var gcTimeInScript = 0;
+        var renderTimeInScript = 0;
+
+        var intervalStarts = {};
+        events.forEach( (event) => {
+                var ph = event["ph"];
+        var name = event["name"];
+        var microIterations = 1;
+        var microIterationsMatch = RegExpWrapper.firstMatch(_MICRO_ITERATIONS_REGEX, name);
+        if (isPresent(microIterationsMatch)) {
+            name = microIterationsMatch[1];
+            microIterations = NumberWrapper.parseInt(microIterationsMatch[2], 10);
+        }
+
+        if (StringWrapper.equals(ph, "b") && StringWrapper.equals(name, markName)) {
+            markStartEvent = event;
+        } else if (StringWrapper.equals(ph, "e") && StringWrapper.equals(name, markName)) {
+            markEndEvent = event;
+        }
+        if (isPresent(markStartEvent) && isBlank(markEndEvent) && event["pid"] === markStartEvent["pid"]) {
+            if (StringWrapper.equals(ph, "B") || StringWrapper.equals(ph, "b")) {
+                intervalStarts[name] = event;
+            } else if ((StringWrapper.equals(ph, "E") || StringWrapper.equals(ph, "e")) && isPresent(intervalStarts[name])) {
+                var startEvent = intervalStarts[name];
+                var duration = (event["ts"] - startEvent["ts"]);
+                intervalStarts[name] = null;
+                if (StringWrapper.equals(name, "gc")) {
+                    result["gcTime"] += duration;
+                    var amount = (startEvent["args"]["usedHeapSize"] - event["args"]["usedHeapSize"]) / 1000;
+                    result["gcAmount"] += amount;
+                    var majorGc = event["args"]["majorGc"];
+                    if (isPresent(majorGc) && majorGc) {
+                        result["majorGcTime"] += duration;
+                    }
+                    if (isPresent(intervalStarts["script"])) {
+                        gcTimeInScript += duration;
+                    }
+                } else if (StringWrapper.equals(name, "render")) {
+                    result["renderTime"] += duration;
+                    if (isPresent(intervalStarts["script"])) {
+                        renderTimeInScript += duration;
+                    }
+                } else if (StringWrapper.equals(name, "script")) {
+                    result["scriptTime"] += duration;
+                } else if (isPresent(this._microMetrics[name])) {
+                    result[name] += duration / microIterations;
+                }
+            }
+        }
+        });
+        result["pureScriptTime"] = result["scriptTime"] - gcTimeInScript - renderTimeInScript;
+        return isPresent(markStartEvent) && isPresent(markEndEvent) ? result : null;
     }
 }
