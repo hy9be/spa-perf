@@ -2,14 +2,10 @@ package com.hy9be.spaperf.driver;
 
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.logging.LogType;
-import org.openqa.selenium.logging.LoggingPreferences;
-import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 
 /**
  * Created by hyou on 6/20/15.
@@ -24,9 +20,9 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         DesiredCapabilities caps = DesiredCapabilities.chrome();
 
         // Enable performance logging
-        LoggingPreferences logPrefs = new LoggingPreferences();
-        logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
-        caps.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
+        //LoggingPreferences logPrefs = new LoggingPreferences();
+        //logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
+        //caps.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
 
         // Enable timeline tracing
         Map<String, Object> chromeOptions = new HashMap<String, Object>();

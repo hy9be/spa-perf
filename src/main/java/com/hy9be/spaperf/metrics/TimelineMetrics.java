@@ -1,9 +1,12 @@
 package com.hy9be.spaperf.metrics;
 
 import com.eclipsesource.json.JsonObject;
+import org.apache.commons.collections.map.HashedMap;
 import org.openqa.selenium.logging.LogEntry;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The class parsing the timeline log info
@@ -15,7 +18,10 @@ public class TimelineMetrics {
 
     }
 
-    private void normalizeTimelineRecord(List<LogEntry> logEntries) {
+    private List<JsonObject> processTimelineRecord(List<LogEntry> logEntries) {
+        List<JsonObject> normalizedEvents = new ArrayList<>();
+        Map<String, Boolean> majorGCPids = new HashedMap();
+
         for (LogEntry logEntry : logEntries) {
             JsonObject logEntryJsonWrapper = JsonObject.readFrom(logEntry.getMessage());
 
@@ -27,53 +33,51 @@ public class TimelineMetrics {
             String pid = logEntryJsonParams.get("pid").asString();
             String ph = logEntryJsonParams.get("ph").asString();
 
-            if (cat == "disabled-by-default-devtools.timeline")) {
+            if (cat == "disabled-by-default-devtools.timeline") {
                 if ((name == "FunctionCall")
                         && (args != null
                         || args.get("data").asString().length() == 0
                         || args.get("data").asObject().get("scriptName").asString() != "InjectedScript")) {
-                    ListWrapper.push(normalizedEvents, normalizeEvent(event, {
-                            'name': 'script'
-                    }));
+                    normalizedEvents.add(new JsonObject()
+                            .add("name", "script")
+                            .add("events", logEntryJsonParams));
                 } else if ((name == "RecalculateStyles")
                         || (name == "Layout")
                         || (name == "UpdateLayerTree")
                         || (name == "Paint")
                         || (name == "Rasterize")
                         || (name == "CompositeLayers")) {
-                    ListWrapper.push(normalizedEvents, normalizeEvent(event, {
-                            'name': 'render'
-                    }));
+                    normalizedEvents.add(new JsonObject()
+                            .add("name", "render")
+                            .add("events", logEntryJsonParams));
                 } else if (name == "GCEvent") {
-                    var normArgs = {
-                            'usedHeapSize': isPresent(args['usedHeapSizeAfter']) ? args['usedHeapSizeAfter'] : args['usedHeapSizeBefore']
-                    };
-                    if (StringWrapper.equals(event['ph'], 'E')) {
-                        normArgs['majorGc'] = isPresent(majorGCPids[pid]) && majorGCPids[pid];
+                    JsonObject normArgs = new JsonObject().add("usedHeapSize",
+                            (args.get("usedHeapSizeAfter") != null) ? args.get("usedHeapSizeAfter").asString() : args.get("usedHeapSizeBefore").asString());
+                    if (ph == "E") {
+                        normArgs.set("majorGc", majorGCPids.get(pid));
                     }
-                    majorGCPids[pid] = false;
-                    ListWrapper.push(normalizedEvents, normalizeEvent(event, {
-                            'name': 'gc',
-                            'args': normArgs
-                    }));
+                    majorGCPids.put(pid, false);
+                    normalizedEvents.add(new JsonObject()
+                            .add("name", "gc")
+                            .add("args", normArgs));
                 }
             } else if (cat == "blink.console") {
-                ListWrapper.push(normalizedEvents, normalizeEvent(event, {
-                        'name': name
-                }));
+                normalizedEvents.add(new JsonObject()
+                        .add("name", name)
+                        .add("events", logEntryJsonParams));
             } else if (cat == "v8") {
                 if (name == "majorGC") {
                     if (ph == "B'") {
-                        majorGCPids[pid] = true;
+                        majorGCPids.put(pid, true);
                     }
                 }
             }
+        }
 
         return normalizedEvents;
-        }
     }
 
-    private void processTimelineRecord() {
+    private void aggregateData() {
         /*
 
         {"message":{
@@ -112,41 +116,6 @@ public class TimelineMetrics {
 
          */
 
-        /*switch (logEntry.getString(Config.traceLogging_eventType)) {
-            case "I": // Instant Event
-            case "X": // Duration Event
-                var duration = e.dur || e.tdur || 0;
-                this.addData_(e.name, duration / 1000);
-                this.runtimePerfMetrics.processRecord({
-                        type: e.name,
-                    data: e.args ? e.args.data : {},
-                    startTime: e.ts / 1000,
-                    endTime: (e.ts + duration) / 1000
-                }, "tracing");
-                break;
-            case "B": // Begin Event
-                    if (typeof this.eventStacks[e.tid] === "undefined") {
-                    this.eventStacks[e.tid] = [];
-                }
-                this.eventStacks[e.tid].push(e);
-                break;
-            case "E": // End Event
-                if (typeof this.eventStacks[e.tid] === "undefined" || this.eventStacks[e.tid].length === 0) {
-                    debug("Encountered an end event that did not have a start event", e);
-                } else {
-                    var b = this.eventStacks[e.tid].pop();
-                    if (b.name !== e.name) {
-                        debug("Start and end events dont have the same name", e, b);
-                    }
-                    this.addData_(e.name, (e.ts - b.ts) / 1000);
-                    this.runtimePerfMetrics.processRecord({
-                            type: e.name,
-                            data: helpers.extend(e.args.endData, b.args.beginData),
-                            startTime: b.ts / 1000,
-                            endTime: e.ts / 1000
-                    }, "tracing");
-                }
-                break;
-        }*/
+
     }
 }
