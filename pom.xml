@@ -8,8 +8,8 @@
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
 
-  <name>A Camel Route</name>
-  <url>http://www.myorganization.org</url>
+  <name>spa-perf</name>
+  <url>https://github.com/hy9be/spa-perf</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
