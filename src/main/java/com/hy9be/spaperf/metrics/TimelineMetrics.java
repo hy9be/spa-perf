@@ -192,18 +192,24 @@ public class TimelineMetrics {
             result.add(microMetrics.get(key), 0);
         }
 
-        var markStartEvent = null;
-        var markEndEvent = null;
-        var gcTimeInScript = 0;
-        var renderTimeInScript = 0;
+        JsonObject markStartEvent = null;
+        JsonObject markEndEvent = null;
+        int gcTimeInScript = 0;
+        int renderTimeInScript = 0;
 
         var intervalStarts = {};
+
         for(JsonObject event : events) {
             String ph = event.get("ph").asString();
             String name = event.get("name").asString();
             int microIterations = 1;
-
+            // microIterationsMatch = RegExpWrapper.firstMatch(_MICRO_ITERATIONS_REGEX, name);
+            if (isPresent(microIterationsMatch)) {
+                name = microIterationsMatch[1];
+                microIterations = Int.parseInt(microIterationsMatch[2], 10);
+            }
         }
+
         events.forEach( (event) => {
                 var ph = event["ph"];
             var name = event["name"];
