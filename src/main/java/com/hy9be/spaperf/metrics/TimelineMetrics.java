@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  * The class parsing the timeline log info
- * Reference (in node.js): https://github.com/axemclion/browser-perf/blob/master/lib/metrics/TimelineMetrics.js
+ * Reference https://github.com/angular/angular/blob/master/modules/benchpress/src/metric/perflog_metric.ts
  * Created by hyou on 6/20/15.
  */
 public class TimelineMetrics {

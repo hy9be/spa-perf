@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.logging.Level;
 
 /**
+ * Reference to the extension functions:
+ * https://github.com/angular/angular/blob/master/modules/benchpress/src/webdriver/chrome_driver_extension.ts
  * Created by hyou on 6/20/15.
  */
 public class SPAPerfChromeDriver extends ChromeDriver {
