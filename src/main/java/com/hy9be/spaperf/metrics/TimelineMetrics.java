@@ -5,9 +5,7 @@ import com.eclipsesource.json.JsonValue;
 import org.apache.commons.collections.map.HashedMap;
 import org.openqa.selenium.logging.LogEntry;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The class parsing the timeline log info
@@ -29,12 +27,10 @@ public class TimelineMetrics {
             "webview":"browser"}
     */
 
-    _driverExtension:WebDriverExtension;
-    _remainingEvents:List;
-    _measureCount:int;
-    _setTimeout:Function;
-    _microMetrics:StringMap<string, string>;
-    _perfLogFeatures:PerfLogFeatures;
+    int measureCount;
+    List remainingEvents;
+    Map<String, String> microMetrics;
+    PerfLogFeatures perfLogFeatures;
 
     /**
      * Constructor
@@ -126,7 +122,7 @@ public class TimelineMetrics {
             result.add("dur", (dur.length() == 0) ? 0.0 : Long.parseLong(dur) / 1000);
         }
 
-        for( JsonObject.Member member : data ) {
+        for(JsonObject.Member member : data) {
             String name = member.getName();
             JsonValue value = member.getValue();
             result.add(name, value);
@@ -135,22 +131,66 @@ public class TimelineMetrics {
         return result;
     }
 
-    private void aggregateEvents() {
+    private void addEvents(List<JsonObject> events) {
+        boolean needSort = false;
+
+        for (JsonObject event : events) {
+            if (event.get("ph").asString() == "X") {
+                needSort = true;
+                JsonObject startEvent = new JsonObject();
+                JsonObject endEvent = new JsonObject();
+
+                for(JsonObject.Member member : event) {
+                    String prop = member.getName();
+                    JsonValue value = member.getValue();
+
+                    startEvent.add(prop, value);
+                    endEvent.add(prop, value);
+                }
+
+                startEvent.add("ph", "B");
+                endEvent.add("ph", "E");
+                endEvent.add("ts", startEvent.get("ts").asLong() + startEvent.get("dur").asLong());
+
+                remainingEvents.add(startEvent);
+                remainingEvents.add(endEvent);
+            } else {
+                remainingEvents.add(event);
+            }
+        }
+
+        if (needSort) {
+            // Need to sort because of the ph==='X' events
+            Collections.sort(remainingEvents, new Comparator<JsonObject>() {
+                public int compare(JsonObject a, JsonObject b) {
+                    Long diff = a.get("ts").asLong() - b.get("ts").asLong();
+                    return diff > 0
+                            ? 1
+                            : diff < 0
+                            ? -1
+                            : 0;
+                }
+            });
+        }
+    }
+
+    private void aggregateEvents(List<JsonObject> events) {
         JsonObject result = new JsonObject()
                 .add("scriptTime", 0)
                 .add("pureScriptTime", 0);
 
-        if (this._perfLogFeatures.gc) {
-            result["gcTime"] = 0;
-            result["majorGcTime"] = 0;
-            result["gcAmount"] = 0;
+        if (perfLogFeatures.gc) {
+            result.add("gcTime", 0);
+            result.add("majorGcTime", 0);
+            result.add("gcAmount", 0);
         }
-        if (this._perfLogFeatures.render) {
-            result["renderTime"] = 0;
+        if (perfLogFeatures.render) {
+            result.add("renderTime", 0);
         }
-        StringMapWrapper.forEach(this._microMetrics, (desc, name) => {
-            result[name] = 0;
-        });
+
+        for(String key : microMetrics.keySet()) {
+            result.add(microMetrics.get(key), 0);
+        }
 
         var markStartEvent = null;
         var markEndEvent = null;
@@ -158,51 +198,57 @@ public class TimelineMetrics {
         var renderTimeInScript = 0;
 
         var intervalStarts = {};
+        for(JsonObject event : events) {
+            String ph = event.get("ph").asString();
+            String name = event.get("name").asString();
+            int microIterations = 1;
+
+        }
         events.forEach( (event) => {
                 var ph = event["ph"];
-        var name = event["name"];
-        var microIterations = 1;
-        var microIterationsMatch = RegExpWrapper.firstMatch(_MICRO_ITERATIONS_REGEX, name);
-        if (isPresent(microIterationsMatch)) {
-            name = microIterationsMatch[1];
-            microIterations = NumberWrapper.parseInt(microIterationsMatch[2], 10);
-        }
+            var name = event["name"];
+            var microIterations = 1;
+            var microIterationsMatch = RegExpWrapper.firstMatch(_MICRO_ITERATIONS_REGEX, name);
+            if (isPresent(microIterationsMatch)) {
+                name = microIterationsMatch[1];
+                microIterations = NumberWrapper.parseInt(microIterationsMatch[2], 10);
+            }
 
-        if (StringWrapper.equals(ph, "b") && StringWrapper.equals(name, markName)) {
-            markStartEvent = event;
-        } else if (StringWrapper.equals(ph, "e") && StringWrapper.equals(name, markName)) {
-            markEndEvent = event;
-        }
-        if (isPresent(markStartEvent) && isBlank(markEndEvent) && event["pid"] === markStartEvent["pid"]) {
-            if (StringWrapper.equals(ph, "B") || StringWrapper.equals(ph, "b")) {
-                intervalStarts[name] = event;
-            } else if ((StringWrapper.equals(ph, "E") || StringWrapper.equals(ph, "e")) && isPresent(intervalStarts[name])) {
-                var startEvent = intervalStarts[name];
-                var duration = (event["ts"] - startEvent["ts"]);
-                intervalStarts[name] = null;
-                if (StringWrapper.equals(name, "gc")) {
-                    result["gcTime"] += duration;
-                    var amount = (startEvent["args"]["usedHeapSize"] - event["args"]["usedHeapSize"]) / 1000;
-                    result["gcAmount"] += amount;
-                    var majorGc = event["args"]["majorGc"];
-                    if (isPresent(majorGc) && majorGc) {
-                        result["majorGcTime"] += duration;
+            if (StringWrapper.equals(ph, "b") && StringWrapper.equals(name, markName)) {
+                markStartEvent = event;
+            } else if (StringWrapper.equals(ph, "e") && StringWrapper.equals(name, markName)) {
+                markEndEvent = event;
+            }
+            if (isPresent(markStartEvent) && isBlank(markEndEvent) && event["pid"] === markStartEvent["pid"]) {
+                if (StringWrapper.equals(ph, "B") || StringWrapper.equals(ph, "b")) {
+                    intervalStarts[name] = event;
+                } else if ((StringWrapper.equals(ph, "E") || StringWrapper.equals(ph, "e")) && isPresent(intervalStarts[name])) {
+                    var startEvent = intervalStarts[name];
+                    var duration = (event["ts"] - startEvent["ts"]);
+                    intervalStarts[name] = null;
+                    if (StringWrapper.equals(name, "gc")) {
+                        result["gcTime"] += duration;
+                        var amount = (startEvent["args"]["usedHeapSize"] - event["args"]["usedHeapSize"]) / 1000;
+                        result["gcAmount"] += amount;
+                        var majorGc = event["args"]["majorGc"];
+                        if (isPresent(majorGc) && majorGc) {
+                            result["majorGcTime"] += duration;
+                        }
+                        if (isPresent(intervalStarts["script"])) {
+                            gcTimeInScript += duration;
+                        }
+                    } else if (StringWrapper.equals(name, "render")) {
+                        result["renderTime"] += duration;
+                        if (isPresent(intervalStarts["script"])) {
+                            renderTimeInScript += duration;
+                        }
+                    } else if (StringWrapper.equals(name, "script")) {
+                        result["scriptTime"] += duration;
+                    } else if (isPresent(this._microMetrics[name])) {
+                        result[name] += duration / microIterations;
                     }
-                    if (isPresent(intervalStarts["script"])) {
-                        gcTimeInScript += duration;
-                    }
-                } else if (StringWrapper.equals(name, "render")) {
-                    result["renderTime"] += duration;
-                    if (isPresent(intervalStarts["script"])) {
-                        renderTimeInScript += duration;
-                    }
-                } else if (StringWrapper.equals(name, "script")) {
-                    result["scriptTime"] += duration;
-                } else if (isPresent(this._microMetrics[name])) {
-                    result[name] += duration / microIterations;
                 }
             }
-        }
         });
         result["pureScriptTime"] = result["scriptTime"] - gcTimeInScript - renderTimeInScript;
         return isPresent(markStartEvent) && isPresent(markEndEvent) ? result : null;
