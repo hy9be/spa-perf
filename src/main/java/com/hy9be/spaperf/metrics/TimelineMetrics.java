@@ -29,6 +29,13 @@ public class TimelineMetrics {
             "webview":"browser"}
     */
 
+    _driverExtension:WebDriverExtension;
+    _remainingEvents:List;
+    _measureCount:int;
+    _setTimeout:Function;
+    _microMetrics:StringMap<string, string>;
+    _perfLogFeatures:PerfLogFeatures;
+
     /**
      * Constructor
      */
@@ -96,7 +103,6 @@ public class TimelineMetrics {
     }
 
     private JsonObject normalizeEvent(JsonObject chromeEvent, JsonObject data) {
-        JsonObject result = new JsonObject();
 
         String ph = chromeEvent.get("ph").asString();
 
@@ -130,10 +136,10 @@ public class TimelineMetrics {
     }
 
     private void aggregateEvents() {
-        var result = {
-                "scriptTime": 0,
-                "pureScriptTime": 0
-        };
+        JsonObject result = new JsonObject()
+                .add("scriptTime", 0)
+                .add("pureScriptTime", 0);
+
         if (this._perfLogFeatures.gc) {
             result["gcTime"] = 0;
             result["majorGcTime"] = 0;
