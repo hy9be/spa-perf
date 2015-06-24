@@ -2,6 +2,8 @@ package com.hy9be.spaperf.metrics;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import com.hy9be.spaperf.util.RegExpWrapper;
+import com.hy9be.spaperf.util.isXXX;
 import org.apache.commons.collections.map.HashedMap;
 import org.openqa.selenium.logging.LogEntry;
 
@@ -174,7 +176,7 @@ public class TimelineMetrics {
         }
     }
 
-    private void aggregateEvents(List<JsonObject> events) {
+    private JsonObject aggregateEvents(List<JsonObject> events, String markName) {
         JsonObject result = new JsonObject()
                 .add("scriptTime", 0)
                 .add("pureScriptTime", 0);
@@ -196,67 +198,62 @@ public class TimelineMetrics {
         JsonObject markEndEvent = null;
         int gcTimeInScript = 0;
         int renderTimeInScript = 0;
-
-        var intervalStarts = {};
+        JsonObject intervalStarts = new JsonObject();
 
         for(JsonObject event : events) {
             String ph = event.get("ph").asString();
             String name = event.get("name").asString();
             int microIterations = 1;
-            // microIterationsMatch = RegExpWrapper.firstMatch(_MICRO_ITERATIONS_REGEX, name);
-            if (isPresent(microIterationsMatch)) {
-                name = microIterationsMatch[1];
-                microIterations = Int.parseInt(microIterationsMatch[2], 10);
-            }
-        }
+            List<String> microIterationsMatch = RegExpWrapper.firstMatch("_MICRO_ITERATIONS_REGEX", name);
 
-        events.forEach( (event) => {
-                var ph = event["ph"];
-            var name = event["name"];
-            var microIterations = 1;
-            var microIterationsMatch = RegExpWrapper.firstMatch(_MICRO_ITERATIONS_REGEX, name);
-            if (isPresent(microIterationsMatch)) {
-                name = microIterationsMatch[1];
-                microIterations = NumberWrapper.parseInt(microIterationsMatch[2], 10);
+            if (microIterationsMatch.size() != 0) {
+                name = microIterationsMatch.get(0);
+                microIterations = Integer.parseInt(microIterationsMatch.get(1), 10);
             }
 
-            if (StringWrapper.equals(ph, "b") && StringWrapper.equals(name, markName)) {
+            if (ph == "b" && name == markName) {
                 markStartEvent = event;
-            } else if (StringWrapper.equals(ph, "e") && StringWrapper.equals(name, markName)) {
+            } else if (ph == "e" && name == markName) {
                 markEndEvent = event;
             }
-            if (isPresent(markStartEvent) && isBlank(markEndEvent) && event["pid"] === markStartEvent["pid"]) {
-                if (StringWrapper.equals(ph, "B") || StringWrapper.equals(ph, "b")) {
-                    intervalStarts[name] = event;
-                } else if ((StringWrapper.equals(ph, "E") || StringWrapper.equals(ph, "e")) && isPresent(intervalStarts[name])) {
-                    var startEvent = intervalStarts[name];
-                    var duration = (event["ts"] - startEvent["ts"]);
-                    intervalStarts[name] = null;
-                    if (StringWrapper.equals(name, "gc")) {
-                        result["gcTime"] += duration;
-                        var amount = (startEvent["args"]["usedHeapSize"] - event["args"]["usedHeapSize"]) / 1000;
-                        result["gcAmount"] += amount;
-                        var majorGc = event["args"]["majorGc"];
-                        if (isPresent(majorGc) && majorGc) {
-                            result["majorGcTime"] += duration;
+
+            if (isXXX.isPresent(markStartEvent) && isXXX.isBlank(markEndEvent) && event.get("pid").asString() == markStartEvent.get("pid").asString()) {
+                if (ph == "B" || ph == "b") {
+                    intervalStarts.add(name, event);
+                } else if (ph == "E" || ph == "e" && (intervalStarts.get(name) != null)) {
+                    JsonObject startEvent = intervalStarts.get(name).asObject();
+                    long duration = event.get("ts").asLong() - startEvent.get("ts").asLong();
+                    intervalStarts.remove(name);
+
+                    if (name == "gc") {
+                        result.set("gcTime", result.get("gcTime").asLong() + duration);
+
+                        int amount = (startEvent.get("args").asObject().get("usedHeapSize").asInt() - event.get("args").asObject().get("usedHeapSize").asInt()) / 1000;
+                        result.set("gcAmount", result.get("gcAmount").asLong() + amount);
+
+                        String majorGc = event.get("args").asObject().get("majorGc").asString();
+                        if (majorGc != null) {
+                            result.set("majorGcTime", result.get("majorGcTime").asLong() + duration);
                         }
-                        if (isPresent(intervalStarts["script"])) {
+                        if (intervalStarts.get("script") != null) {
                             gcTimeInScript += duration;
                         }
-                    } else if (StringWrapper.equals(name, "render")) {
-                        result["renderTime"] += duration;
-                        if (isPresent(intervalStarts["script"])) {
+                    } else if (name == "render") {
+                        result.set("renderTime", result.get("renderTime").asLong() + duration);
+                        if (intervalStarts.get("script") != null) {
                             renderTimeInScript += duration;
                         }
-                    } else if (StringWrapper.equals(name, "script")) {
-                        result["scriptTime"] += duration;
-                    } else if (isPresent(this._microMetrics[name])) {
-                        result[name] += duration / microIterations;
+                    } else if (name == "script") {
+                        result.set("scriptTime", result.get("scriptTime").asLong() + duration);
+                    } else if (isXXX.isPresent(microMetrics.get(name))) {
+                        result.set(name, result.get(name).asLong() + duration / microIterations);
                     }
                 }
             }
-        });
-        result["pureScriptTime"] = result["scriptTime"] - gcTimeInScript - renderTimeInScript;
-        return isPresent(markStartEvent) && isPresent(markEndEvent) ? result : null;
+        }
+
+        result.set("pureScriptTime", result.get("scriptTime").asLong() - gcTimeInScript - renderTimeInScript);
+        return isXXX.isPresent(markStartEvent) && isXXX.isPresent(markEndEvent) ? result : null;
+
     }
 }
