@@ -1,6 +1,7 @@
 package com.hy9be.spaperf.driver;
 
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import org.apache.commons.collections.map.HashedMap;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -66,7 +67,7 @@ public class SPAPerfChromeDriver extends ChromeDriver {
     }
 
     // Conver the log to events
-    private List<JsonObject> convertPerfRecordsToEvents(List<JsonObject> events) {
+    private List<JsonObject> convertPerfRecordsToEvents(List<JsonObject> events) throws Exception {
         List<JsonObject> normalizedEvents = new ArrayList<>();
         Map<String, Boolean> majorGCPids = new HashedMap();
 
@@ -83,18 +84,15 @@ public class SPAPerfChromeDriver extends ChromeDriver {
                         && (args != null
                         || args.get("data").asString().length() == 0
                         || args.get("data").asObject().get("scriptName").asString() != "InjectedScript")) {
-                    normalizedEvents.add(new JsonObject()
-                            .add("name", "script")
-                            .add("events", event));
+                    normalizedEvents.add(normalizeEvent(event, new JsonObject().add("name", "script")));
+
                 } else if ((name == "RecalculateStyles")
                         || (name == "Layout")
                         || (name == "UpdateLayerTree")
                         || (name == "Paint")
                         || (name == "Rasterize")
                         || (name == "CompositeLayers")) {
-                    normalizedEvents.add(new JsonObject()
-                            .add("name", "render")
-                            .add("events", event));
+                    normalizedEvents.add(normalizeEvent(event, new JsonObject().add("name", "render")));
                 } else if (name == "GCEvent") {
                     JsonObject normArgs = new JsonObject().add("usedHeapSize",
                             (args.get("usedHeapSizeAfter") != null) ? args.get("usedHeapSizeAfter").asString() : args.get("usedHeapSizeBefore").asString());
@@ -102,24 +100,70 @@ public class SPAPerfChromeDriver extends ChromeDriver {
                         normArgs.set("majorGc", majorGCPids.get(pid));
                     }
                     majorGCPids.put(pid, false);
-                    normalizedEvents.add(new JsonObject()
-                            .add("name", "gc")
-                            .add("args", normArgs));
+                    normalizedEvents.add(normalizeEvent(event, new JsonObject().add("name", "gc").add("args", normArgs)));
                 }
             } else if (cat == "blink.console") {
-                normalizedEvents.add(new JsonObject()
-                        .add("name", name)
-                        .add("events", event));
+                normalizedEvents.add(normalizeEvent(event, new JsonObject().add("name", name)));
             } else if (cat == "v8") {
                 if (name == "majorGC") {
                     if (ph == "B") {
                         majorGCPids.put(pid, true);
                     }
                 }
+            } else if (cat == "benchmark") {
+                // TODO(goderbauer): Instead of BenchmarkInstrumentation::ImplThreadRenderingStats the
+                // following events should be used (if available) for more accurate measurments:
+                //   1st choice: vsync_before - ground truth on Android
+                //   2nd choice: BenchmarkInstrumentation::DisplayRenderingStats - available on systems with
+                //               new surfaces framework (not broadly enabled yet)
+                //   3rd choice: BenchmarkInstrumentation::ImplThreadRenderingStats - fallback event that is
+                //               allways available if something is rendered
+                if (name == "BenchmarkInstrumentation::ImplThreadRenderingStats") {
+                    int frameCount = event.get("args").asObject().get("data").asObject().get("frame_count").asInt();
+                    if (frameCount > 1) {
+                        throw new Exception("multi-frame render stats not supported");
+                    }
+                    if (frameCount == 1) {
+                        normalizedEvents.add(normalizeEvent(event, new JsonObject().add("name", "'frame'")));
+                    }
+                }
             }
         }
 
         return normalizedEvents;
+    }
+
+    private JsonObject normalizeEvent(JsonObject chromeEvent, JsonObject data) {
+
+        String ph = chromeEvent.get("ph").asString();
+
+        if (ph == "S") {
+            ph = "b";
+        } else if (ph == "F") {
+            ph = "e";
+        }
+
+        JsonObject result = new JsonObject()
+                .add("pid", chromeEvent.get("pid").asString())
+                .add("ph", ph)
+                .add("cat", "timeline")
+                .add("ts", chromeEvent.get("ts").asLong() / 1000);
+
+        if (ph == "X") {
+            String dur = chromeEvent.get("dur").asString();
+            if (dur == null || dur.length() == 0) {
+                dur = chromeEvent.get("tdur").asString();
+            }
+            result.add("dur", (dur.length() == 0) ? 0.0 : Long.parseLong(dur) / 1000);
+        }
+
+        for(JsonObject.Member member : data) {
+            String name = member.getName();
+            JsonValue value = member.getValue();
+            result.add(name, value);
+        }
+
+        return result;
     }
 
     // Detach the driver but do not close the browser session (vs. this.close())

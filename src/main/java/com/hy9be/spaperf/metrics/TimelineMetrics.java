@@ -41,39 +41,6 @@ public class TimelineMetrics {
 
     }
 
-    private JsonObject normalizeEvent(JsonObject chromeEvent, JsonObject data) {
-
-        String ph = chromeEvent.get("ph").asString();
-
-        if (ph == "S") {
-            ph = "b";
-        } else if (ph == "F") {
-            ph = "e";
-        }
-
-        JsonObject result = new JsonObject()
-                .add("pid", chromeEvent.get("pid").asString())
-                .add("ph", ph)
-                .add("cat", "timeline")
-                .add("ts", chromeEvent.get("ts").asLong() / 1000);
-
-        if (ph == "X") {
-            String dur = chromeEvent.get("dur").asString();
-            if (dur == null || dur.length() == 0) {
-                dur = chromeEvent.get("tdur").asString();
-            }
-            result.add("dur", (dur.length() == 0) ? 0.0 : Long.parseLong(dur) / 1000);
-        }
-
-        for(JsonObject.Member member : data) {
-            String name = member.getName();
-            JsonValue value = member.getValue();
-            result.add(name, value);
-        }
-
-        return result;
-    }
-
     private void addEvents(List<JsonObject> events) {
         boolean needSort = false;
 
