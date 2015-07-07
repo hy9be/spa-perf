@@ -1,5 +1,8 @@
 package com.hy9be.spaperf.metrics;
 
+import com.hy9be.spaperf.driver.SPAPerfChromeDriver;
+import org.openqa.selenium.JavascriptExecutor;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +19,13 @@ public class NetworkMetrics extends BaseMetricGroup {
     public NetworkMetrics()  {
     }
 
-    public void getResult(List entries) {
+    private List getPerfLogFromDriver(SPAPerfChromeDriver driver) {
+        return (List<Map>)((JavascriptExecutor) driver).executeScript("return window.performance.getEntries()");
+    }
+
+    public void getResult(SPAPerfChromeDriver driver) {
+        List entries = getPerfLogFromDriver(driver);
+
         performanceResult = new HashMap<String, double[]>();
         HashMap<String, Double> startTime = new HashMap<>();
         for (int i = 0; i < selectedPerformanceCounters.length; i++) {

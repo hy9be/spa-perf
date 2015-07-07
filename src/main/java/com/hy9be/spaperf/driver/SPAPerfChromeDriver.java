@@ -5,7 +5,6 @@ import com.eclipsesource.json.JsonValue;
 import com.hy9be.spaperf.metrics.BaseMetricGroup;
 import com.hy9be.spaperf.metrics.NetworkMetrics;
 import com.hy9be.spaperf.metrics.TimelineMetrics;
-import com.hy9be.spaperf.metrics.deprecated.BenchPressTimelineMetrics;
 import com.hy9be.spaperf.output.CSVPersistor;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.ArrayUtils;
@@ -68,23 +67,28 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         return (List<Map>)((JavascriptExecutor) this).executeScript("return window.performance.getEntries()");
     }
 
-    public void startPerformanceProfiling(String fName)
+    public void enablePerfProfiling(String fName)
     {
+        // Reset performance logs in driver
         this.manage().logs().get(LogType.PERFORMANCE).getAll();
+
+        // Get the baseline of network metrics
         List<Map> currentNetworkActivity = (List<Map>)((JavascriptExecutor) this).executeScript("return window.performance.getEntries()");
         NetworkMetrics.previousNetworkActivityCounts = currentNetworkActivity.size();
 
-        // generate row header for the csvOutput
         fileName = fName;
         selectedPerformanceCounters = ArrayUtils.addAll(TimelineMetrics.selectedPerformanceCounters, NetworkMetrics.selectedPerformanceCounters);
+
+        // Generate the csv output file according to the row header and file path
         CSVPersistor csvFile = new CSVPersistor(fileName, selectedPerformanceCounters);
     }
 
-    public void performProfiling(String actionName){
+    public void collectPerfData(String actionName){
+
         TimelineMetrics timelineData = new TimelineMetrics();
-        timelineData.getResult(getPerformanceLog());
+        timelineData.getResult(this);
         NetworkMetrics networkData = new NetworkMetrics();
-        networkData.getResult(getNetworkActivityLog());
+        networkData.getResult(this);
 
         List<BaseMetricGroup> perfMetrics = new ArrayList<>();
         perfMetrics.add(timelineData);

@@ -1,7 +1,9 @@
 package com.hy9be.spaperf.metrics;
 
 import com.eclipsesource.json.JsonObject;
+import com.hy9be.spaperf.driver.SPAPerfChromeDriver;
 import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
 
 import java.util.HashMap;
 import java.util.List;
@@ -14,9 +16,15 @@ public class TimelineMetrics extends BaseMetricGroup {
             "RecalculateStyles", "Scroll", "CompositeLayers", "ImageDecode", "ImageResize", "Paint"};
 
     public TimelineMetrics(){
-    };
+    }
 
-    public void getResult(List entries) {
+    private List getPerfLogFromDriver(SPAPerfChromeDriver driver) {
+        return driver.manage().logs().get(LogType.PERFORMANCE).getAll();
+    }
+
+    public void getResult(SPAPerfChromeDriver driver) {
+        List entries = getPerfLogFromDriver(driver);
+
         performanceResult = new HashMap<String, double[]>();
         HashMap<String, Double> startTime = new HashMap<>();
         for (int i = 0; i < selectedPerformanceCounters.length; i++) {

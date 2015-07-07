@@ -110,7 +110,7 @@ public class BenchPressTimelineMetrics {
             String ph = event.get("ph").asString();
             String name = event.get("name").asString();
             int microIterations = 1;
-            List<String> microIterationsMatch = RegExpWrapper.firstMatch("_MICRO_ITERATIONS_REGEX", name);
+            List<String> microIterationsMatch = RegExpWrapper.firstMatch(new JsonObject(), name); //JsonObject "_MICRO_ITERATIONS_REGEX"
 
             if (microIterationsMatch.size() != 0) {
                 name = microIterationsMatch.get(0);
