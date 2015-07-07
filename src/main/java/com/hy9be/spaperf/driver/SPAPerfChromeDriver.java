@@ -2,7 +2,10 @@ package com.hy9be.spaperf.driver;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import com.hy9be.spaperf.metrics.BaseMetricGroup;
+import com.hy9be.spaperf.metrics.NetworkMetrics;
 import com.hy9be.spaperf.metrics.TimelineMetrics;
+import com.hy9be.spaperf.metrics.deprecated.BenchPressTimelineMetrics;
 import com.hy9be.spaperf.output.CSVPersistor;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.ArrayUtils;
@@ -83,7 +86,7 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         NetworkMetrics networkData = new NetworkMetrics();
         networkData.getResult(getNetworkActivityLog());
 
-        List<BaseMetrics> perfMetrics = new ArrayList<>();
+        List<BaseMetricGroup> perfMetrics = new ArrayList<>();
         perfMetrics.add(timelineData);
         perfMetrics.add(networkData);
         CSVPersistor.csvResult(perfMetrics, selectedPerformanceCounters, actionName, fileName);

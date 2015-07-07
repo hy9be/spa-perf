@@ -1,4 +1,4 @@
-package com.hy9be.spaperf.metrics;
+package com.hy9be.spaperf.metrics.deprecated;
 
 /**
  * Created by hyou on 6/23/15.
