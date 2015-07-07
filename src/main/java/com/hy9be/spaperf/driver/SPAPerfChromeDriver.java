@@ -2,7 +2,11 @@ package com.hy9be.spaperf.driver;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import com.hy9be.spaperf.metrics.TimelineMetrics;
+import com.hy9be.spaperf.output.CSVPersistor;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.ArrayUtils;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogEntry;
@@ -23,6 +27,9 @@ import java.util.logging.Level;
  * Created by hyou on 6/20/15.
  */
 public class SPAPerfChromeDriver extends ChromeDriver {
+    private String fileName;
+    private String[] selectedPerformanceCounters;
+
     public SPAPerfChromeDriver() {
         super(getPerformanceLoggingCapabilities());
     }
@@ -48,7 +55,50 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         return caps;
     }
 
-    // Get the log
+    public List<LogEntry> getPerformanceLog ()
+    {
+        return this.manage().logs().get(LogType.PERFORMANCE).getAll();
+    }
+
+    public List<Map> getNetworkActivityLog ()
+    {
+        return (List<Map>)((JavascriptExecutor) this).executeScript("return window.performance.getEntries()");
+    }
+
+    public void startPerformanceProfiling(String fName)
+    {
+        this.manage().logs().get(LogType.PERFORMANCE).getAll();
+        List<Map> currentNetworkActivity = (List<Map>)((JavascriptExecutor) this).executeScript("return window.performance.getEntries()");
+        NetworkMetrics.previousNetworkActivityCounts = currentNetworkActivity.size();
+
+        // generate row header for the csvOutput
+        fileName = fName;
+        selectedPerformanceCounters = ArrayUtils.addAll(TimelineMetrics.selectedPerformanceCounters, NetworkMetrics.selectedPerformanceCounters);
+        CSVPersistor csvFile = new CSVPersistor(fileName, selectedPerformanceCounters);
+    }
+
+    public void performProfiling(String actionName){
+        TimelineMetrics timelineData = new TimelineMetrics();
+        timelineData.getResult(getPerformanceLog());
+        NetworkMetrics networkData = new NetworkMetrics();
+        networkData.getResult(getNetworkActivityLog());
+
+        List<BaseMetrics> perfMetrics = new ArrayList<>();
+        perfMetrics.add(timelineData);
+        perfMetrics.add(networkData);
+        CSVPersistor.csvResult(perfMetrics, selectedPerformanceCounters, actionName, fileName);
+    }
+
+    // Detach the driver but do not close the browser session (vs. this.close())
+    public void detach() {
+        this.close();
+    }
+
+    public void stopPerformanceProfiling(){
+
+    }
+
+    // Get the log: ported from benchpress@AngularJS
     public List<JsonObject> readPerfLog() throws Exception {
         List<LogEntry> entries = this.manage().logs().get(LogType.PERFORMANCE).getAll();
 
@@ -68,7 +118,7 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         return convertPerfRecordsToEvents(events);
     }
 
-    // Conver the log to events
+    // Conver the log to events: ported from benchpress@AngularJS
     private List<JsonObject> convertPerfRecordsToEvents(List<JsonObject> events) throws Exception {
         List<JsonObject> normalizedEvents = new ArrayList<>();
         Map<String, Boolean> majorGCPids = new HashedMap();
@@ -135,6 +185,7 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         return normalizedEvents;
     }
 
+    // Normalize the event: : ported from benchpress@AngularJS
     private JsonObject normalizeEvent(JsonObject chromeEvent, JsonObject data) {
 
         String ph = chromeEvent.get("ph").asString();
@@ -166,10 +217,5 @@ public class SPAPerfChromeDriver extends ChromeDriver {
         }
 
         return result;
-    }
-
-    // Detach the driver but do not close the browser session (vs. this.close())
-    public void detach() {
-        this.close();
     }
 }
